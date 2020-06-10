@@ -18,7 +18,7 @@ const users = {};
  app.get("/urls", (req, res) => {
   let templateVars = { 
     urls: urlDatabase, 
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
@@ -27,7 +27,7 @@ const users = {};
 app.get("/urls/new", (req, res) => { 
   let templateVars = { 
     urls: urlDatabase, 
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -37,7 +37,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
    };
   res.render("urls_show", templateVars);
 });
@@ -52,7 +52,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { username: req.cookies["username"] }
+  let templateVars = { user: users[req.cookies["user_id"]] }
   res.render("urls_register", templateVars);
 });
 
@@ -64,7 +64,7 @@ app.post("/urls", (req, res) => {
   let templateVars = { 
     shortURL : req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
@@ -95,10 +95,21 @@ app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email; 
   const password = req.body.password;
-  addUser(userID, email, password);
-  res.cookie("user_id", userID);
-  res.redirect("urls");
+  if (!email || !password) {
+    res.status(400).send("Email or password is empty.");
+  } else if (lookupEmail(email)) {
+    res.status(400).send("Email is already registered.");
+  } else {
+    addUser(userID, email, password);
+    res.cookie("user_id", userID);
+    res.redirect("urls");
+  }
 });
+
+// returns user or undefined 
+const lookupEmail = (email) => {
+  return Object.values(users).find(user => user.email === email);
+}
 
 const addUser = (userID, email, password) => {
   user = {
