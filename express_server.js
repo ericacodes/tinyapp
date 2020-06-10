@@ -9,8 +9,8 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aJ48lW"},
+  "9sm5xK": { longURL: "http://www.google.com", userID: "aJ48lW"}
 };
 
 const users = {};
@@ -36,15 +36,15 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies["user_id"]]
    };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  if (!urlDatabase[req.params.shortURL].startsWith('http')) {
+  let longURL = urlDatabase[req.params.shortURL].longURL;
+  if (!urlDatabase[req.params.shortURL].longURL.startsWith('http')) {
     longURL = `http://${urlDatabase[req.params.shortURL]}`;
   };
   res.redirect(longURL);
@@ -62,15 +62,17 @@ app.get("/login", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  const short = generateRandomString();
-  urlDatabase[short] = req.body.longURL;
-  res.redirect(`/urls/${short}`);
-  let templateVars = { 
-    shortURL : req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_show", templateVars);
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL
+  const userID = req.cookies["user_id"]
+  urlDatabase[shortURL] = { longURL, userID };
+  res.redirect(`/urls/${shortURL}`);
+  // let templateVars = { 
+  //   shortURL : req.params.shortURL,
+  //   longURL: urlDatabase[req.params.shortURL],
+  //   user: users[req.cookies["user_id"]]
+  // };
+  // res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -84,11 +86,6 @@ app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
 });
-
-// app.post("/login", (req, res) => {
-//   res.cookie("username", req.body.username);
-//   res.redirect("/urls");
-// });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
@@ -105,7 +102,7 @@ app.post("/register", (req, res) => {
     res.status(400).send("Email is already registered.");
   } else {
     addUser(userID, email, password);
-    res.cookie("user_id", userID);
+    res.cookie("user_id", userID); // registers then logged in 
     res.redirect("urls");
   }
 });
@@ -119,7 +116,7 @@ app.post("/login", (req, res) => {
   } else if (!authenticateUser(email, password)) {
     res.status(403).send("Incorrect password");
   } else {
-    res.cookie("user_id", user.userID);
+    res.cookie("user_id", user.userID); // logged in 
     res.redirect("/urls");
   }
 });
