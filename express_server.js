@@ -47,8 +47,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL].startsWith('http')) {
     longURL = `http://${urlDatabase[req.params.shortURL]}`;
   };
-  let templateVars = { urls: urlDatabase };// username not needed since redirected?
-  res.redirect(longURL, templateVars);
+  res.redirect(longURL);
 });
 
 app.get("/register", (req, res) => {
@@ -86,13 +85,13 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
-});
+// app.post("/login", (req, res) => {
+//   res.cookie("username", req.body.username);
+//   res.redirect("/urls");
+// });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -111,10 +110,32 @@ app.post("/register", (req, res) => {
   }
 });
 
-// returns user or undefined ////////////////
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!lookupEmail(email)) {
+    res.status(403).send("Email has not been registered.");
+  } else if (!authenticateUser(email, password)) {
+    res.status(403).send("Incorrect password");
+  } else {
+    res.cookie("user_id", user.userID);
+    res.redirect("/urls");
+  }
+});
+
+// returns user or undefined 
+const authenticateUser = (email, password) => {
+  const user = lookupEmail(email);
+  if (user.password === password) {
+    return user; 
+  }
+};
+
+// returns user or undefined
 const lookupEmail = (email) => {
   return Object.values(users).find(user => user.email === email);
-}
+};
 
 const addUser = (userID, email, password) => {
   user = {
