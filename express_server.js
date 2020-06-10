@@ -56,6 +56,11 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  let templateVars = { user: null }
+  res.render("urls_login", templateVars);
+})
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   const short = generateRandomString();
@@ -106,7 +111,7 @@ app.post("/register", (req, res) => {
   }
 });
 
-// returns user or undefined 
+// returns user or undefined ////////////////
 const lookupEmail = (email) => {
   return Object.values(users).find(user => user.email === email);
 }

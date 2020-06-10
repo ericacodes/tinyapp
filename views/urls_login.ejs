@@ -13,19 +13,31 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
-      <h3>Register</h3>
-      <form method="POST" action="/register">
-        <div class="form-group row">
-          <label for="email" class="col-sm-2 col-form-label">Email:</label>
-          <input class="form-control" type="email" name="email" style="width: 300px">
-        </div>
-        <div class="form-group row">
-          <label for="password" class="col-sm-2 col-form-label">Password:</label>
-          <div class="col-sm-10">
-            <input class="form-control" type="password" name="password" style="width: 300px">
+      <h3>Login</h3>
+      <form method="post" action="/login">
+        <div style="width: 50em;">
+          <div class="form-group">
+          <label for="email">Email:</label>
+          <input
+            style="width: 100%"
+            type="text"
+            name="email"
+            id="email"
+            placeholder="Please enter your email">
           </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+            style="width: 100%"
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Please enter your password">
+          
+          </div>
+  
+          <input type="submit" class="btn btn-primary" value="Login" />
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
       </form>
     </main>
       <!-- Bootstrap JS -->
