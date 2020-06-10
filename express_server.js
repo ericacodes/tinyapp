@@ -13,6 +13,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {};
+
  app.get("/urls", (req, res) => {
   let templateVars = { 
     urls: urlDatabase, 
@@ -47,6 +49,11 @@ app.get("/u/:shortURL", (req, res) => {
   };
   let templateVars = { urls: urlDatabase };// username not needed since redirected?
   res.redirect(longURL, templateVars);
+});
+
+app.get("/register", (req, res) => {
+  let templateVars = { username: req.cookies["username"] }
+  res.render("urls_register", templateVars);
 });
 
 app.post("/urls", (req, res) => {
