@@ -4,6 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
 
@@ -134,12 +135,15 @@ app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   if (!email || !password) {
     res.status(400).send("Email or password is empty.");
   } else if (lookupEmail(email)) {
     res.status(400).send("Email is already registered.");
   } else {
-    addUser(userID, email, password);
+    addUser(userID, email, hashedPassword);
+    console.log(users);
     res.cookie("user_id", userID); // registers then logged in
     res.redirect("/urls");
   }
@@ -172,17 +176,17 @@ const lookupEmail = (email) => {
 // Return user if password matches email. Otherwise undefined.
 const authenticateUser = (email, password) => {
   const user = lookupEmail(email);
-  if (user.password === password) {
+  if (bcrypt.compareSync(password, user.hashedPassword)) {
     return user;
   }
 };
 
 // Add user to users database.
-const addUser = (userID, email, password) => {
+const addUser = (userID, email, hashedPassword) => {
   const user = {
     userID,
     email,
-    password
+    hashedPassword
   };
   users[userID] = user;
 };
