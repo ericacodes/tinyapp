@@ -7,6 +7,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
+const { lookupEmail, authenticateUser, addUser, generateRandomString, checkOwner, urlsForUser } = require('./helpers.js')
 
 // Specify other setup configurations
 app.set("view engine", "ejs");
@@ -21,7 +22,7 @@ const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "aJ48lW"},
   "9sm5xK": { longURL: "http://www.google.com", userID: "aJ48lW"}
 };
-const users = {};
+const usersDatabase = {};
 
 // Create server on port 8080
 app.listen(PORT, () => {
@@ -36,9 +37,9 @@ app.get("/urls", (req, res) => {
   // const userID = req.cookies["user_id"];
   const userID = req.session.user_id;
   let templateVars = {
-    urls: urlsForUser(userID),
+    urls: urlsForUser(userID, urlDatabase),
     // user: users[req.cookies["user_id"]]
-    user: users[req.session.user_id]
+    user: usersDatabase[req.session.user_id]
   };
   res.render("urls_index", templateVars);
 });
@@ -47,7 +48,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    user: users[req.session.user_id]
+    user: usersDatabase[req.session.user_id]
   };
   res.render("urls_new", templateVars);
 });
@@ -57,12 +58,12 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID)
+  const isOwner = checkOwner(shortURL, userID, urlDatabase)
   if (isOwner === true) {
     let templateVars = {
       shortURL,
       longURL,
-      user: users[userID]
+      user: usersDatabase[userID]
     };
     res.render("urls_show", templateVars);
   } else {
@@ -93,7 +94,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Read register page
 app.get("/register", (req, res) => {
-  let templateVars = { user: users[req.session.user_id] };
+  let templateVars = { user: usersDatabase[req.session.user_id] };
   res.render("urls_register", templateVars);
 });
 
@@ -117,7 +118,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID)
+  const isOwner = checkOwner(shortURL, userID, urlDatabase)
   if (isOwner === true) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
@@ -138,7 +139,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID)
+  const isOwner = checkOwner(shortURL, userID, urlDatabase)
   if (isOwner === true) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
@@ -165,11 +166,11 @@ app.post("/register", (req, res) => {
 
   if (!email || !password) {
     res.status(400).send("Email or password is empty.");
-  } else if (lookupEmail(email)) {
+  } else if (lookupEmail(email, usersDatabase)) {
     res.status(400).send("Email is already registered.");
   } else {
-    addUser(userID, email, hashedPassword);
-    console.log(users);
+    addUser(userID, email, hashedPassword, usersDatabase);
+    console.log(usersDatabase);
     req.session.user_id = userID;
     res.redirect("/urls");
   }
@@ -178,9 +179,9 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = authenticateUser(email, password);
+  const user = authenticateUser(email, password, usersDatabase);
 
-  if (!lookupEmail(email)) {
+  if (!lookupEmail(email, usersDatabase)) {
     res.status(403).send("Email has not been registered.");
   } else if (!user) {
     res.status(403).send("Incorrect password");
@@ -189,67 +190,6 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   }
 });
-
-// ------------------------------------------ HELPER FUNCTIONS ------------------------------------------
-
-
-// Return user if email is registered. Otherwise undefined.
-const lookupEmail = (email) => {
-  return Object.values(users).find(user => user.email === email);
-};
-
-
-// Return user if password matches email. Otherwise undefined.
-const authenticateUser = (email, password) => {
-  const user = lookupEmail(email);
-  // console.log("this da user", user);
-  if (bcrypt.compareSync(password, user.hashedPassword)) {
-    return user;
-  }
-};
-
-// Add user to users database.
-const addUser = (userID, email, hashedPassword) => {
-  const user = {
-    userID,
-    email,
-    hashedPassword
-  };
-  users[userID] = user;
-};
-
-// Return random alphanumeric string
-const generateRandomString = () => {
-  const alphanumericCharacters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i <= 5; i++) {
-    result += alphanumericCharacters.charAt(Math.floor(Math.random() * alphanumericCharacters.length));
-  }
-  return result;
-};
-
-// Return message string if not logged in or not owner. Otherwise true. 
-const checkOwner = (shortURL, userID) => {
-  // return userID === urlDatabase[shortURL].userID;
-  if (!userID) {
-    return "Please login first."
-  } else if (userID !== urlDatabase[shortURL].userID) {
-    return "You are not the owner of this short URL."
-  } else {
-    return true; 
-  }
-};
-
-// Return object containing urls made by user (could be empty)
-const urlsForUser = (id) => {
-  const result = {};
-  for (const key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      result[key] = urlDatabase[key];
-    }
-  }
-  return result;
-};
 
 
 
