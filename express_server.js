@@ -57,29 +57,59 @@ app.get("/urls/new", (req, res) => {
 
 // Read urls_show page associated to shortURL
 app.get("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID, urlDatabase);
-  if (isOwner === true) {
+  const shortURL = req.params.shortURL;
+  
+  if (!userID) {
+    const templateVars = { user: null };
+    res.render("urls_errorNotLoggedIn", templateVars);
+  } else if (!urlDatabase[shortURL]) {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_errorInvalidShortURL", templateVars);
+  } else if (userID !== urlDatabase[shortURL].userID) {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_errorNotOwner", templateVars);
+  } else {
     const templateVars = {
       shortURL,
-      longURL,
+      longURL : urlDatabase[shortURL].longURL,
       user: usersDatabase[userID]
-    };
+    }
     res.render("urls_show", templateVars);
-  } else {
-    res.send(isOwner);
   }
+  // const shortURL = req.params.shortURL;
+  // if (!urlDatabase[shortURL]) {
+  //   res.send("invalid");
+  // } else {
+  //   const longURL = urlDatabase[shortURL].longURL;
+  //   const userID = req.session.user_id;
+  //   const isOwner = checkOwner(shortURL, userID, urlDatabase);
+  //   if (isOwner === true) {
+  //     const templateVars = {
+  //       shortURL,
+  //       longURL,
+  //       user: usersDatabase[userID]
+  //     };
+  //     res.render("urls_show", templateVars);
+  //   } else {
+  //     res.send(isOwner);
+  //   }
+  // }
 });
 
 // Read longURL page associated to shortURL
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].longURL;
-  if (!longURL.startsWith('http')) {
-    longURL = `http://${longURL}`;
-  };
-  res.redirect(longURL);
+  const shortURL = req.params.shortURL;
+  if (!urlDatabase[shortURL]) {
+    const templateVars = { user: usersDatabase[req.session.user_id] }
+    res.render("urls_errorInvalidShortURL", templateVars);
+  } else {
+    let longURL = urlDatabase[shortURL].longURL;
+    if (!longURL.startsWith('http')) {
+      longURL = `http://${longURL}`;
+    };
+    res.redirect(longURL);
+  }
 });
 
 // Read register page
@@ -106,28 +136,60 @@ app.post("/urls", (req, res) => {
 
 // Delete shortURL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID, urlDatabase);
-  if (isOwner === true) {
+  const shortURL = req.params.shortURL;
+
+  if (!userID) {
+    const templateVars = { user: null };
+    res.render("urls_errorNotLoggedIn", templateVars);
+  } else if (!urlDatabase[shortURL]) {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_errorInvalidShortURL", templateVars);
+  } else if (userID !== urlDatabase[shortURL].userID) {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_errorNotOwner", templateVars);
+  } else {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
-  } else {
-    res.send(isOwner);
   }
+  // const shortURL = req.params.shortURL;
+  // const userID = req.session.user_id;
+  // const isOwner = checkOwner(shortURL, userID, urlDatabase);
+  // if (isOwner === true) {
+  //   delete urlDatabase[req.params.shortURL];
+  //   res.redirect("/urls");
+  // } else {
+  //   res.send(isOwner);
+  // }
 });
 
 // Edit shortURL
 app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID, urlDatabase);
-  if (isOwner === true) {
-    urlDatabase[shortURL].longURL = req.body.longURL;
-    res.redirect("/urls");
+  const shortURL = req.params.shortURL;
+
+  if (!userID) {
+    const templateVars = { user: null };
+    res.render("urls_errorNotLoggedIn", templateVars);
+  } else if (!urlDatabase[shortURL]) {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_errorInvalidShortURL", templateVars);
+  } else if (userID !== urlDatabase[shortURL].userID) {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_errorNotOwner", templateVars);
   } else {
-    res.send(isOwner);
+    urlDatabase[shortURL].longURL = req.body.longURL;
+      res.redirect("/urls");
   }
+  // const shortURL = req.params.shortURL;
+  // const userID = req.session.user_id;
+  // const isOwner = checkOwner(shortURL, userID, urlDatabase);
+  // if (isOwner === true) {
+  //   urlDatabase[shortURL].longURL = req.body.longURL;
+  //   res.redirect("/urls");
+  // } else {
+  //   res.send(isOwner);
+  // }
 });
 
 // Logout current user
@@ -142,11 +204,10 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
+  const templateVars = { user: null };
 
-  if (!email || !password) {
-    res.status(400).send("Email or password is empty.");
-  } else if (lookupEmail(email, usersDatabase)) {
-    res.status(400).send("Email is already registered.");
+  if (lookupEmail(email, usersDatabase)) {
+    res.status(400).render("urls_errorAlreadyRegistered", templateVars);
   } else {
     addUser(userID, email, hashedPassword, usersDatabase);
     req.session.user_id = userID;
@@ -159,11 +220,13 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = authenticateUser(email, password, usersDatabase);
+  let templateVars = { user: null };
+  console.log(templateVars);
 
   if (!lookupEmail(email, usersDatabase)) {
-    res.status(403).send("Email has not been registered.");
+    res.status(403).render("urls_errorUnregistered", templateVars);
   } else if (!user) {
-    res.status(403).send("Incorrect password");
+    res.status(403).render("urls_errorIncorrectPassword", templateVars);
   } else {
     req.session.user_id = user.userID;
     res.redirect("/urls");
