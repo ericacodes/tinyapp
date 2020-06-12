@@ -34,25 +34,40 @@ app.listen(PORT, () => {
 // GET REQUESTS
 // Read urls_index page
 app.get("/", (req,res) => {
-  res.redirect("/urls");
+  const userID = req.session.user_id;
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  let templateVars = {
-    urls: urlsForUser(userID, urlDatabase),
-    user: usersDatabase[userID]
-  };
-  res.render("urls_index", templateVars);
+  if (userID) {
+    const templateVars = {
+      urls: urlsForUser(userID, urlDatabase),
+      user: usersDatabase[userID]
+    };
+    res.render("urls_index", templateVars);
+  } else {
+    const templateVars = { user: null };
+    res.render("urls_errorNotLoggedIn", templateVars);
+  }
 });
 
 // Read urls_new page
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    user: usersDatabase[req.session.user_id]
-  };
-  res.render("urls_new", templateVars);
+  const userID = req.session.user_id;
+  if (userID) {
+    const templateVars = {
+      urls: urlDatabase,
+      user: usersDatabase[userID]
+    };
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // Read urls_show page associated to shortURL
@@ -80,24 +95,6 @@ app.get("/urls/:shortURL", (req, res) => {
     };
     res.render("urls_show", templateVars);
   }
-  // const shortURL = req.params.shortURL;
-  // if (!urlDatabase[shortURL]) {
-  //   res.send("invalid");
-  // } else {
-  //   const longURL = urlDatabase[shortURL].longURL;
-  //   const userID = req.session.user_id;
-  //   const isOwner = checkOwner(shortURL, userID, urlDatabase);
-  //   if (isOwner === true) {
-  //     const templateVars = {
-  //       shortURL,
-  //       longURL,
-  //       user: usersDatabase[userID]
-  //     };
-  //     res.render("urls_show", templateVars);
-  //   } else {
-  //     res.send(isOwner);
-  //   }
-  // }
 });
 
 // Read longURL page associated to shortURL
@@ -117,24 +114,39 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Read register page
 app.get("/register", (req, res) => {
-  const templateVars = { user: usersDatabase[req.session.user_id] };
-  res.render("urls_register", templateVars);
+  const userID = req.session.user_id;
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = { user: usersDatabase[userID] };
+    res.render("urls_register", templateVars);
+  }
 });
 
 // Read login page
 app.get("/login", (req, res) => {
-  const templateVars = { user: null };
-  res.render("urls_login", templateVars);
+  const userID = req.session.user_id;
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = { user: null };
+    res.render("urls_login", templateVars);
+  }
 });
 
 // POST REQUESTS
 // Create new shortURL
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  const longURL = req.body.longURL;
   const userID = req.session.user_id;
-  urlDatabase[shortURL] = { longURL, userID };
-  res.redirect(`/urls/${shortURL}`);
+  if (userID) {
+    const shortURL = generateRandomString();
+    const longURL = req.body.longURL;
+    urlDatabase[shortURL] = { longURL, userID };
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    const templateVars = { user: null };
+    res.render("urls_errorNotLoggedIn", templateVars);
+  }
 });
 
 // Delete shortURL
@@ -158,15 +170,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   }
-  // const shortURL = req.params.shortURL;
-  // const userID = req.session.user_id;
-  // const isOwner = checkOwner(shortURL, userID, urlDatabase);
-  // if (isOwner === true) {
-  //   delete urlDatabase[req.params.shortURL];
-  //   res.redirect("/urls");
-  // } else {
-  //   res.send(isOwner);
-  // }
 });
 
 // Edit shortURL
@@ -190,15 +193,6 @@ app.post("/urls/:shortURL", (req, res) => {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
   }
-  // const shortURL = req.params.shortURL;
-  // const userID = req.session.user_id;
-  // const isOwner = checkOwner(shortURL, userID, urlDatabase);
-  // if (isOwner === true) {
-  //   urlDatabase[shortURL].longURL = req.body.longURL;
-  //   res.redirect("/urls");
-  // } else {
-  //   res.send(isOwner);
-  // }
 });
 
 // Logout current user
@@ -230,7 +224,6 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const user = authenticateUser(email, password, usersDatabase);
   let templateVars = { user: null };
-  console.log(templateVars);
 
   if (!lookupEmail(email, usersDatabase)) {
     res.status(403).render("urls_errorUnregistered", templateVars);
