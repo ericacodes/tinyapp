@@ -23,6 +23,11 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
+      <h3>Welcome to TinyApp!</h3>
+      <div class="pt-3">
+        <p>TinyApp is a URL shortening service that creates short aliases for long URLs. These aliases can be edited or deleted at any time. <br> If you are a returning user, please login below. If you are a new user, please <a href="/register">register</a> first.</p>
+      </div>
+
       <h3>Login</h3>
       <form name="loginForm" method="POST" action="/login" onsubmit="return validateForm()">
         <div class="form-group row">
@@ -35,6 +40,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
+
     </main>
       <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
