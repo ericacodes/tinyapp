@@ -43,21 +43,21 @@ describe('authenticateUser', function() {
   });
   it("should return undefined for a valid email and incorrect password", function() {
     const actual = authenticateUser("user@example.com", "hellooooo", testUsers);
-    const expected = undefined; 
+    const expected = undefined;
     assert.equal(actual, expected);
-  })
+  });
   it("should return undefined for an invalid email", function() {
     const actual = authenticateUser("user@example.commmmm", "hellooooo", testUsers);
-    const expected = undefined; 
+    const expected = undefined;
     assert.equal(actual, expected);
   });
 });
 
 describe('addUser', function() {
   it("should add user to database", function() {
-    const hashedPassword = bcrypt.hashSync("myPassword", 10)
-    const addedUser = addUser("myUserID", "ericasun@example.com", hashedPassword, testUsers);
-    const actual = testUsers["myUserID"]; 
+    const hashedPassword = bcrypt.hashSync("myPassword", 10);
+    addUser("myUserID", "ericasun@example.com", hashedPassword, testUsers);
+    const actual = testUsers["myUserID"];
     const expected = {
       userID: "myUserID",
       email: "ericasun@example.com",
@@ -72,8 +72,8 @@ describe('addUser', function() {
 describe('generateRandomString', function() {
   it("should return a random string", function() {
     const id = generateRandomString();
-    const idType = typeof id; 
-    const idLength = id.length; 
+    const idType = typeof id;
+    const idLength = id.length;
     assert.equal(idType, "string");
     assert.equal(idLength, 6);
   });
