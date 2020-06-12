@@ -171,6 +171,7 @@ app.post("/register", (req, res) => {
   } else {
     addUser(userID, email, hashedPassword, usersDatabase);
     console.log(usersDatabase);
+    console.log(usersDatabase);
     req.session.user_id = userID;
     res.redirect("/urls");
   }
