@@ -12,35 +12,28 @@
 <body>
   <%- include('partials/_header') %>
   <main style="margin: 1em;">
-    <!-- <% if (user) { %> -->
-      <h3>My URLs</h3>
-      <table class="table">
-        <thead>
+    <h3>My URLs</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Short URL</th>
+          <th scope="col">Long URL</th>
+          <th scope="col">Edit</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(let url in urls) { %>
           <tr>
-            <th scope="col">Short URL</th>
-            <th scope="col">Long URL</th>
-            <th scope="col">Edit</th>
-            <th scope="col">Delete</th>
+            <td><%= url %></td>
+            <td><%= urls[url].longURL %></td>
+            <td><form method="GET" action="/urls/<%= url %>"><button type="submit" class="btn btn-outline-primary">Edit</button></form></td>
+            <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-outline-danger">Delete</button></form></td>
           </tr>
-        </thead>
-        <tbody>
-          <% for(let url in urls) { %>
-            <tr>
-              <td><%= url %></td>
-              <td><%= urls[url].longURL %></td>
-              <td><form method="GET" action="/urls/<%= url %>"><button type="submit" class="btn btn-outline-primary">Edit</button></form></td>
-              <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-outline-danger">Delete</button></form></td>
-            </tr>
-          <% } %>
-        </tbody>
-      </table>
-      <a href="/urls/new">Create a New Short Link</a>
-    <!-- <% } else { %> 
-      <h3>Welcome to TinyApp!</h3>
-      <div class="pt-3">
-        <p>TinyApp is a URL shortening service that creates short aliases for long URLs. These aliases can be edited or deleted at any time. <br> To use this service, please <a href="/login">login</a> first. If you are a new user, please <a href="/register">register</a> first.</p>
-      </div>
-    <% } %> -->
+        <% } %>
+      </tbody>
+    </table>
+    <a href="/urls/new">Create a New Short Link</a>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
