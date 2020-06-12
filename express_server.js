@@ -58,9 +58,9 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID, urlDatabase)
+  const isOwner = checkOwner(shortURL, userID, urlDatabase);
   if (isOwner === true) {
-    let templateVars = {
+    const templateVars = {
       shortURL,
       longURL,
       user: usersDatabase[userID]
@@ -69,24 +69,12 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
     res.send(isOwner);
   }
-  // if (!userID) {
-  //   res.send("Please login first");
-  // } else if (userID !== urlDatabase[shortURL].userID) {
-  //   res.send("Not your URL");
-  // } else {
-  //   let templateVars = {
-  //     shortURL,
-  //     longURL,
-  //     user: users[req.session.user_id]
-  //   };
-  //   res.render("urls_show", templateVars);
-  // }
 });
 
 // Read longURL page associated to shortURL
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL].longURL;
-  if (!urlDatabase[req.params.shortURL].longURL.startsWith('http')) {
+  if (!longURL.startsWith('http')) {
     longURL = `http://${urlDatabase[req.params.shortURL]}`;
   }
   res.redirect(longURL);
@@ -94,13 +82,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Read register page
 app.get("/register", (req, res) => {
-  let templateVars = { user: usersDatabase[req.session.user_id] };
+ const templateVars = { user: usersDatabase[req.session.user_id] };
   res.render("urls_register", templateVars);
 });
 
 // Read login page
 app.get("/login", (req, res) => {
-  let templateVars = { user: null };
+  const templateVars = { user: null };
   res.render("urls_login", templateVars);
 });
 

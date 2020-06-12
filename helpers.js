@@ -10,8 +10,10 @@ const lookupEmail = (email, usersDatabase) => {
 const authenticateUser = (email, password, usersDatabase) => {
   const user = lookupEmail(email, usersDatabase);
   // console.log("this da user", user);
-  if (bcrypt.compareSync(password, user.hashedPassword)) {
-    return user;
+  if (user) {
+    if (bcrypt.compareSync(password, user.hashedPassword)) {
+      return user;
+    }
   }
 };
 
