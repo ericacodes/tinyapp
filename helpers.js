@@ -1,5 +1,6 @@
 // ------------------------------------------ HELPER FUNCTIONS ------------------------------------------
 const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
 
 // Return user if email is registered. Otherwise undefined.
 const lookupEmail = (email, usersDatabase) => {
@@ -29,12 +30,7 @@ const addUser = (userID, email, hashedPassword, usersDatabase) => {
 
 // Return random alphanumeric string
 const generateRandomString = () => {
-  const alphanumericCharacters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i <= 5; i++) {
-    result += alphanumericCharacters.charAt(Math.floor(Math.random() * alphanumericCharacters.length));
-  }
-  return result;
+  return uuidv4().slice(0,6);
 };
 
 // Return message string if not logged in or not owner. Otherwise true. 

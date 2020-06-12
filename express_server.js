@@ -33,13 +33,15 @@ app.listen(PORT, () => {
 
 // GET REQUESTS
 // Read urls_index page
+app.get("/", (req,res) => {
+  res.redirect("/urls");
+});
+
 app.get("/urls", (req, res) => {
-  // const userID = req.cookies["user_id"];
   const userID = req.session.user_id;
   let templateVars = {
     urls: urlsForUser(userID, urlDatabase),
-    // user: users[req.cookies["user_id"]]
-    user: usersDatabase[req.session.user_id]
+    user: usersDatabase[userID]
   };
   res.render("urls_index", templateVars);
 });
@@ -75,14 +77,14 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL].longURL;
   if (!longURL.startsWith('http')) {
-    longURL = `http://${urlDatabase[req.params.shortURL]}`;
-  }
+    longURL = `http://${longURL}`;
+  };
   res.redirect(longURL);
 });
 
 // Read register page
 app.get("/register", (req, res) => {
- const templateVars = { user: usersDatabase[req.session.user_id] };
+  const templateVars = { user: usersDatabase[req.session.user_id] };
   res.render("urls_register", templateVars);
 });
 
@@ -106,47 +108,35 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID, urlDatabase)
+  const isOwner = checkOwner(shortURL, userID, urlDatabase);
   if (isOwner === true) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   } else {
     res.send(isOwner);
   }
-  // if (!userID) {
-  //   res.send("Please login first");
-  // } else if (!checkOwner(shortURL, userID)) {
-  //   res.send("Cannot delete. You are not the owner");
-  // } else {
-  //   delete urlDatabase[req.params.shortURL];
-  //   res.redirect("/urls");
-  // }
 });
 
 // Edit shortURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const isOwner = checkOwner(shortURL, userID, urlDatabase)
+  const isOwner = checkOwner(shortURL, userID, urlDatabase);
   if (isOwner === true) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
   } else {
     res.send(isOwner);
   }
-  // if (!userID) {
-  //   res.send("Please login first");
-  // } else if (!checkOwner(shortURL, userID)) {
-  //   res.send("Cannot edit. You are not the owner");
 });
 
 // Logout current user
 app.post("/logout", (req, res) => {
-  req.session.user_id = null;;
+  req.session.user_id = null;
   res.redirect("/urls");
 });
 
-// Register user 
+// Register user
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
@@ -175,7 +165,7 @@ app.post("/login", (req, res) => {
   } else if (!user) {
     res.status(403).send("Incorrect password");
   } else {
-    req.session.user_id = user.userID; // logged in
+    req.session.user_id = user.userID;
     res.redirect("/urls");
   }
 });

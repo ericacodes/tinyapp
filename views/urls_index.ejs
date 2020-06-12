@@ -34,12 +34,13 @@
           <% } %>
         </tbody>
       </table>
-      <!-- <h3><a href=#>Create New URL</a></h3> -->
+      <a href="/urls/new">Create a New Short Link</a>
     <% } else { %>
       <h3>Welcome to TinyApp!</h3>
-      <p>TinyApp is a URL shortening service that creates short aliases for long URLs. These aliases can be edited or deleted at any time.</p>
-      <p>To use this service, please <a href="/login">login</a> first. If you are a new user, please <a href="/register">register</a> first.</p>
-      <% } %>
+      <div class="pt-3">
+        <p>TinyApp is a URL shortening service that creates short aliases for long URLs. These aliases can be edited or deleted at any time. <br> To use this service, please <a href="/login">login</a> first. If you are a new user, please <a href="/register">register</a> first.</p>
+      </div>
+    <% } %>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
