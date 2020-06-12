@@ -23,6 +23,11 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
+      <h3>Join the Family!</h3>
+      <div class="pt-3">
+        <p>TinyApp is a URL shortening service that creates short aliases for long URLs. These aliases can be edited or deleted at any time. <br> If you are a new user, please register below. If you are a returning user, please <a href="/login">login.</a> </p>
+      </div>
+
       <h3>Register</h3>
       <form name="registerForm" method="POST" action="/register" onsubmit="return validateForm()">
         <div class="form-group row">

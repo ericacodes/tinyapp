@@ -223,7 +223,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = authenticateUser(email, password, usersDatabase);
-  let templateVars = { user: null };
+  const templateVars = { user: null };
 
   if (!lookupEmail(email, usersDatabase)) {
     res.status(403).render("urls_errorUnregistered", templateVars);
@@ -234,6 +234,3 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   }
 });
-
-
-
