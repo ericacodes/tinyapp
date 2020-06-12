@@ -1,16 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script>
-      function validateForm() {
-        const email = document.forms["registerForm"]["email"].value;
-        const password = document.forms["registerForm"]["password"].value;
-        if (email == "" || password == "") {
-          alert("All fields must be filled.");
-          return false;
-        }
-      }
-    </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -23,18 +13,11 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
-      <h3>Register</h3>
-      <form name="registerForm" method="POST" action="/register" onsubmit="return validateForm()">
-        <div class="form-group row">
-          <label for="email" class="col-sm-2 col-form-label">Email:</label>
-          <input class="form-control" type="email" name="email" style="width: 300px">
-        </div>
-        <div class="form-group row">
-          <label for="password" class="col-sm-2 col-form-label">Password:</label>
-          <input class="form-control" type="password" name="password" style="width: 300px">
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
+      <h3>Uh-oh!</h3>
+      <div class="pt-3">
+        <p> Looks like the email you entered is already registered. Go to <a href="/login">login</a></p>
+      </div>
+      
     </main>
       <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
