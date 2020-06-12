@@ -34,16 +34,16 @@ const generateRandomString = () => {
 };
 
 // Return message string if not logged in or not owner. Otherwise true. 
-const checkOwner = (shortURL, userID, urlDatabase) => {
-  // return userID === urlDatabase[shortURL].userID;
-  if (!userID) {
-    return "Please login first."
-  } else if (userID !== urlDatabase[shortURL].userID) {
-    return "You are not the owner of this short URL."
-  } else {
-    return true; 
-  }
-};
+// const checkOwner = (shortURL, userID, urlDatabase) => {
+//   // return userID === urlDatabase[shortURL].userID;
+//   if (!userID) {
+//     return "Please login first."
+//   } else if (userID !== urlDatabase[shortURL].userID) {
+//     return "You are not the owner of this short URL."
+//   } else {
+//     return true; 
+//   }
+// };
 
 // Return object containing urls made by user (could be empty)
 const urlsForUser = (id, urlDatabase) => {
@@ -57,4 +57,4 @@ const urlsForUser = (id, urlDatabase) => {
 };
 
 
-module.exports = { lookupEmail, authenticateUser, addUser, generateRandomString, checkOwner, urlsForUser };
+module.exports = { lookupEmail, authenticateUser, addUser, generateRandomString, urlsForUser };

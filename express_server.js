@@ -7,7 +7,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
-const { lookupEmail, authenticateUser, addUser, generateRandomString, checkOwner, urlsForUser } = require('./helpers');
+const { lookupEmail, authenticateUser, addUser, generateRandomString, urlsForUser } = require('./helpers');
 
 // Specify other setup configurations
 app.set("view engine", "ejs");
@@ -60,12 +60,15 @@ app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
   
+  // Is the user logged in?
   if (!userID) {
     const templateVars = { user: null };
     res.render("urls_errorNotLoggedIn", templateVars);
+  // Is the requested shortURL valid?
   } else if (!urlDatabase[shortURL]) {
     const templateVars = { user: usersDatabase[userID] };
     res.render("urls_errorInvalidShortURL", templateVars);
+  // Is the user the owner of the short URL?
   } else if (userID !== urlDatabase[shortURL].userID) {
     const templateVars = { user: usersDatabase[userID] };
     res.render("urls_errorNotOwner", templateVars);
@@ -74,7 +77,7 @@ app.get("/urls/:shortURL", (req, res) => {
       shortURL,
       longURL : urlDatabase[shortURL].longURL,
       user: usersDatabase[userID]
-    }
+    };
     res.render("urls_show", templateVars);
   }
   // const shortURL = req.params.shortURL;
@@ -101,13 +104,13 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (!urlDatabase[shortURL]) {
-    const templateVars = { user: usersDatabase[req.session.user_id] }
+    const templateVars = { user: usersDatabase[req.session.user_id] };
     res.render("urls_errorInvalidShortURL", templateVars);
   } else {
     let longURL = urlDatabase[shortURL].longURL;
     if (!longURL.startsWith('http')) {
       longURL = `http://${longURL}`;
-    };
+    }
     res.redirect(longURL);
   }
 });
@@ -139,12 +142,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
 
+  // Is the user logged in?
   if (!userID) {
     const templateVars = { user: null };
     res.render("urls_errorNotLoggedIn", templateVars);
+  // Is the requested shortURL valid?
   } else if (!urlDatabase[shortURL]) {
     const templateVars = { user: usersDatabase[userID] };
     res.render("urls_errorInvalidShortURL", templateVars);
+  // Is the user the owner of the short URL?
   } else if (userID !== urlDatabase[shortURL].userID) {
     const templateVars = { user: usersDatabase[userID] };
     res.render("urls_errorNotOwner", templateVars);
@@ -168,18 +174,21 @@ app.post("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
 
+  // Is the user logged in?
   if (!userID) {
     const templateVars = { user: null };
     res.render("urls_errorNotLoggedIn", templateVars);
+  // Is the requested shortURL valid?
   } else if (!urlDatabase[shortURL]) {
     const templateVars = { user: usersDatabase[userID] };
     res.render("urls_errorInvalidShortURL", templateVars);
+  // Is the user the owner of the short URL?
   } else if (userID !== urlDatabase[shortURL].userID) {
     const templateVars = { user: usersDatabase[userID] };
     res.render("urls_errorNotOwner", templateVars);
   } else {
     urlDatabase[shortURL].longURL = req.body.longURL;
-      res.redirect("/urls");
+    res.redirect("/urls");
   }
   // const shortURL = req.params.shortURL;
   // const userID = req.session.user_id;
