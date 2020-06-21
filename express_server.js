@@ -24,11 +24,6 @@ const urlDatabase = {
 };
 const usersDatabase = {};
 
-// Create server on port 8080
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 // ---------------------------------------------- ROUTERS ----------------------------------------------
 
 // GET REQUESTS
@@ -233,4 +228,11 @@ app.post("/login", (req, res) => {
     req.session.user_id = user.userID;
     res.redirect("/urls");
   }
+});
+
+// ---------------------------------------- CREATE SERVER ------------------------------------------------
+
+// Create server on port 8080
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
